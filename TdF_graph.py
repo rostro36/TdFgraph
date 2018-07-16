@@ -1,9 +1,5 @@
 
 # coding: utf-8
-
-# In[39]:
-
-
 #libs used
 import PyPDF2 as pypdf
 import urllib3
@@ -21,7 +17,7 @@ eq=[dict()]*23
 
 
 def general_proc(string):                       #general classement
-    global rankg                                #ecarts[etape][nombre]=(ecart,rank)    
+    global rankg                                #ecarts[etape][nombre]=(ecart,rank)
     global ecart
     global pedaleurs
     helpr=''
@@ -30,9 +26,9 @@ def general_proc(string):                       #general classement
             helpr+=(string[k])
         else:
             break
-            
+
     #seperate number from the distance
-    if helpr[-1]=='"':                            #there is an actual distance in seconds          
+    if helpr[-1]=='"':                            #there is an actual distance in seconds
         ecart=0
         ecart+=int(helpr[-2])
         ecart+=int(helpr[-3])*10
@@ -75,7 +71,7 @@ def point_proc(string):                            #point classement
     nombre=''
     poi=''
     checkpoint=False
-    for i in range(len(string)):                   ###########why checkpoint              
+    for i in range(len(string)):                   ###########why checkpoint
         if string[i].isdigit():                 #get number
             nombre+=string[i]
             checkpoint=True
@@ -127,7 +123,7 @@ def jeunes_proc(string):                       #young classement
     rankj+=1
 
 
-    
+
 def process(page):
     if ('CLASSEMENT DES JEUNES'==page[:len('CLASSEMENT DES JEUNES')]):
         page=re.split('Page',page,1)[0]              #cut the end
@@ -160,7 +156,7 @@ def process(page):
             for i in range(len(equipe)):
                 if (equipe[i].isdigit() and (equipe[i+1]=='h' or equipe[i+1].isdigit())) or equipe[i]=='\'':
                     break
-            equipenom=equipe[:i]                     
+            equipenom=equipe[:i]
             if equipe[i]=='\'':                      #equipe has the same distance as above
                 eq[etape][equipenom]=(ranke,ecart)
                 ranke+=1
@@ -176,13 +172,13 @@ def process(page):
                 i+=3
             if equipe[i+2]=='"':
                 ecart+=int(equipe[i])*10
-                ecart+=int(equipe[i+1])            
+                ecart+=int(equipe[i+1])
             eq[etape][equipenom]=(ranke,ecart)
             ranke+=1
     elif ('CLASSEMENT DU MEILLEUR GRIMPEUR'==page[:len('CLASSEMENT DU MEILLEUR GRIMPEUR')]):
         page=re.sub('.*PrénomEquipePointsNatNat','',page) #cut the start
         page=re.split('Page',page)[0]                  #cut the end
-        page=re.split(' km',page,1)[0]     
+        page=re.split(' km',page,1)[0]
         entries=re.split(' \d* ',page)                  #split the riders
         entries=entries[1:]                             #first is garbage
         grimpeurs[etape]=[(None,None)]*220
@@ -196,7 +192,7 @@ def process(page):
         ecarts[etape]=[(None,None)]*220
         for pedaleur in entries:                        #process each rider
             general_proc(pedaleur)
-       
+
  #gather the data
 for etape in range(1,22):
     rankg=1
@@ -220,28 +216,6 @@ for etape in range(1,22):
     print(etapestring+' is processed')
 print('all done')
 
-
-# In[18]:
-
-
+#yet to come
 plt.plot([1, 2, 3, 4],[[1,2,3],[12,2,4],[2,None,1],[8,5,4]])
 plt.show()
-
-
-# In[17]:
-
-
-
-
-
-# In[36]:
-
-
-
-
-
-# In[38]:
-
-
-
-
