@@ -1,20 +1,18 @@
-def init():
-    global pedaleurs
-    global ecarts
-    global points
-    global grimpeurs
-    global jeunes
-    global eq
-    pedaleurs=[(None,None,None,None,None,None)]*220 #(NOM,PRENOM,JEUNE,NATION,EQUIPE,int(nombre))
-    ecarts=[None]*23
-    points=[None]*23
-    grimpeurs=[None]*23
-    jeunes=[None]*23
-    eq=[None]*23
-    ecarts[0]=[(0,0)]*220
-    grimpeurs[0]=[(0,200)]*220
-    points[0]=[(0,200)]*220
-    jeunes[0]=[0]*220
+pedaleurs=[(None,None,None,None,None,None)]*220 #(NOM,PRENOM,JEUNE,NATION,EQUIPE,int(nombre))
+ecarts=[None]*23
+points=[None]*23
+grimpeurs=[None]*23
+jeunes=[None]*23
+eq=[None]*23
+ecarts[0]=[(0,0)]*220
+grimpeurs[0]=[(0,200)]*220
+points[0]=[(0,200)]*220
+jeunes[0]=[0]*220
+etape=0
+rankg=1
+rankj=1
+rankgr=1
+rankp=1
 
 def newstage(etape1):
     global rankg

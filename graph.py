@@ -1,41 +1,11 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-import data
+#import data
+from data import pedaleurs,ecarts,points,grimpeurs,jeunes,eq
 #globals are not needed since we only read them and dont write to them.
-def naming():
-    global rankg
-    global rankj
-    global rankgr
-    global rankp
-    global pedaleurs
-    global ecarts
-    global points
-    global grimpeurs
-    global jeunes
-    global eq
-    global etape
-    etape=data.etape
-    pedaleurs=data.pedaleurs
-    ecarts=data.ecarts
-    points=data.points
-    grimpeurs=data.grimpeurs
-    jeunes=data.jeunes
-    eq=data.eq
-    rankg=data.rankg
-    rankj=data.rankj
-    rankgr=data.rankgr
-    rankp=data.rankp
 
-def plot():
-    global pedaleurs
-    global ecarts
-    global points
-    global grimpeurs
-    global jeunes
-    global eq
-
-    naming()
+def plot(etape):
     #type of track
     plat=[1,2,4,7,8,13,18,21]
     acci=[5,6,9,14,15]
