@@ -1,31 +1,38 @@
 # coding: utf-8
 #libs used
-import PyPDF2 as pypdf
 import urllib3
 import io
-from pdfprocess import process
-from graph import plot
+from textprocess import process, check
 from data import newstage
+from graph import plot
+
+import traceback
+import data
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning
+                        )  #otherwise gives warnings I dont know how to fix.
 
 http = urllib3.PoolManager()
 #gather the data
 for etape in range(1, 23):
-    etapestring = (str(hex(etape))[2:]).zfill(2)
     print('working on stage:' + str(etape))
-    URL = 'http://azure.tissottiming.com/File/00031001070101' + etapestring + 'FFFFFFFFFFFFFF00'
+    URL = 'https://www.procyclingstats.com/race/vuelta-a-espana/2018/stage-' + str(
+        etape)
     #download the data
-    r = http.request('GET', URL)
-    #check if press-release is ready/a PDF
-    if r.info()['Content-type'] != 'application/pdf':
-        print(str(etape) + ' not ready')
+    try:
+        r = http.request('GET', URL)  #get the actual site
+    except Exception as ex:
+        print(ex)
+        print('Internet not working.')
+        break
+    page = r.data.decode('UTF-8')
+    #check if ready
+    if not check(page):
+        print(str(etape) + ' is not ready.')
         break
     #open the file
     newstage(etape)
-    read_pdf = pypdf.PdfFileReader(io.BytesIO(r.data))
-    #read_pdf=pypdf.PdfFileReader('cat.pdf')
-    #process each page
-    for pagenum in range(read_pdf.getNumPages()):
-        process(read_pdf.getPage(pagenum).extractText())
+    process(page)
     print(str(etape) + ' is processed')
 print('processing done')
-plot(etape)
+plot(etape)  #get the actual site

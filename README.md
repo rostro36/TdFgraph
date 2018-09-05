@@ -1,2 +1,2 @@
-# TdFgraph
-Graphs for the 2018 Tour de France
+# Vueltagraph
+Graphs for the 2018 Vuelta.
