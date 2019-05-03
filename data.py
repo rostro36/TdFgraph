@@ -1,5 +1,5 @@
 pedaleurs = [(None, None, None, None, None, None)
-            ] * 220  #(NOM,PRENOM,JEUNE,NATION,EQUIPE,int(nombre))
+             ] * 220  #(NOM,PRENOM,JEUNE,NATION,EQUIPE,int(nombre))
 ecarts = [None] * 23
 points = [None] * 23
 grimpeurs = [None] * 23
@@ -22,6 +22,8 @@ acci = [2, 3, 7, 8, 12]
 intermediate = [5, 11, 17]
 montagne = [4, 9, 13, 14, 15, 19, 20]
 clm = [1, 16]
+
+STAGES = 23  #number of stages
 
 abbrevations = dict()
 abbrevations['Astana Pro Team'] = 'AST'

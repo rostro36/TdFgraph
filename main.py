@@ -9,8 +9,9 @@ from graph import plot
 import traceback
 import data
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning
-                        )  #otherwise gives warnings I dont know how to fix.
+urllib3.disable_warnings(
+    urllib3.exceptions.InsecureRequestWarning
+)  #we do not check the certs of the resultssite, because it is not important enouogh for such a project.
 
 http = urllib3.PoolManager()
 #gather the data
