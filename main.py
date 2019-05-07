@@ -1,36 +1,26 @@
 # coding: utf-8
 #libs used
-import urllib3
-import io
-from textprocess import process, check
+from textprocess import process
 from data import newstage
 from graph import plot
+from setupAndDownload import getStageReadiness, download, getProfile, getTeamnames, getPedaleurs
 
 import traceback
 import data
 
-urllib3.disable_warnings(
-    urllib3.exceptions.InsecureRequestWarning
-)  #we do not check the certs of the resultssite, because it is not important enouogh for such a project.
-
-http = urllib3.PoolManager()
 #gather the data
-for etape in range(1, 23):
+URL = 'https://www.procyclingstats.com/race/vuelta-a-espana/2018/'
+stageProfile = getProfile(URL)
+(readyFlags, numberOfStages) = getStageReadiness(URL)
+teamAbbrevations = getTeamnames(URL)
+pedaleurs = getPedaleurs(URL)
+URL = URL + 'stage-'
+for etape in range(1, numberOfStages):
+    if etape > readyFlags[0]:
+        break
     print('working on stage:' + str(etape))
-    URL = 'https://www.procyclingstats.com/race/vuelta-a-espana/2018/stage-' + str(
-        etape)
-    #download the data
-    try:
-        r = http.request('GET', URL)  #get the actual site
-    except Exception as ex:
-        print(ex)
-        print('Internet not working.')
-        break
-    page = r.data.decode('UTF-8')
-    #check if ready
-    if not check(page):
-        print(str(etape) + ' is not ready.')
-        break
+    stageURL = URL + str(etape)
+    page = download(stageURL)
     #open the file
     newstage(etape)
     process(page)
