@@ -1,24 +1,41 @@
 import re
-
-#def check(page):
-#    return (len(re.findall(r'<tbody>', page)) >= 3)
+import sys
 
 
-def process(page, etape):
+def process(page):
     #split the report of the whole day to the different sections
+    resultFlags = checkCategories(page)
     classements = re.split(r'<tbody>', page)[1:]
-    if etape == 1:
-        [gc, points, gcequipe] = classements
-    else:
-        [gc, points, kom, gcequipe] = classements
-    gcClassement = procGC(gc)
-    pointsClassement = procPoints(points)
-    equipeClassement = procGCEquipe(gcequipe)
-    if etape != 1:
-        komClassement = procKOM(kom)
-    else:
-        komClassement = []
-    return (gcClassement, pointsClassement, equipeClassement, komClassement)
+    del classements[1]
+    resultObject = dict()
+    procFunctions = {
+        "gc": procGC,
+        "points": procPoints,
+        "youth": procYouth,
+        "kom": procKOM,
+        "teams": procGCEquipe
+    }
+    for name in resultFlags.keys():
+        if resultFlags[name]:
+            resultObject[name] = procFunctions[name](classements.pop(0))
+    return resultObject
+
+
+def checkCategories(page):
+    resultFlags = {
+        "gc": False,
+        "points": False,
+        "youth": False,
+        "kom": False,
+        "teams": False
+    }
+    if re.search(r'<tbody>', page) is None:
+        print('This etape is not ready.')
+        quit()
+    for name in resultFlags.keys():
+        if re.search(name + '"><span class=', page) is not None:
+            resultFlags[name] = True
+    return resultFlags
 
 
 def procGC(gc):
@@ -75,9 +92,24 @@ def procGCEquipe(gcequipe):
         else:
             equipe = re.split(r'class="timeff">', equipe, 1)[1]
             TIME = getTime(equipe)
-        eq[EQUIPE] = (ranke, TIME)
+        eq[EQUIPE] = (TIME, ranke)
         ranke += 1
     return eq
+
+
+def procYouth(youth):
+    ranky = 1
+    (youths, youthEntries) = setupContainer(youth)
+    for pedaleur in youthEntries:
+        NUMBER = getNumber(pedaleur)
+        if ranky == 1:
+            TIME = 0
+        else:
+            pedaleur = re.split(r'class="timeff">', pedaleur)[1]
+            TIME = getTime(pedaleur)
+        youths[NUMBER] = (TIME, ranky)
+        ranky += 1
+    return youths
 
 
 def getNumber(pedaleur):
@@ -90,7 +122,7 @@ def getNumber(pedaleur):
 
 def getName(pedaleur):
     NAME = ''
-    while pedaleur[0] != '<':
+    while pedaleur[0] != '<' and pedaleur[0] != '&':
         #special case if namestring starts with a space
         if pedaleur[0] != ' ' or len(NAME) != 0:
             NAME += pedaleur[0]
@@ -111,6 +143,8 @@ def getTime(timeString):
             break
         elif c == ' ':
             pass
+        elif c == '-':
+            return sys.maxsize
         else:
             SUBTIME = SUBTIME * 10 + int(c)
     return TIME + SUBTIME

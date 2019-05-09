@@ -2,6 +2,11 @@ import pytest
 import socket
 import setupAndDownload as sAP
 from ast import literal_eval
+import urllib3
+
+urllib3.disable_warnings(
+    urllib3.exceptions.InsecureRequestWarning
+)  #we do not check the certs of the resultssite, because it is not important enouogh for such a project.
 
 
 @pytest.mark.lowLevel
@@ -45,9 +50,15 @@ def test_Readiness():
 @pytest.mark.midLevel
 def test_Profile():
     given = sAP.getProfile(
-        'https://www.procyclingstats.com/race/vuelta-a-espana/2018/')
-    expected = [[0, 15], [0, 9, 15, 17, 20], [1, 5, 6, 10, 11], [7],
-                [2, 4, 13], [3, 8, 12, 14, 16, 18, 19]]
+        'https://www.procyclingstats.com/race/tour-de-romandie/2018/')
+    expected = ([[3], [], [1, 2, 5], [0], [4], [3]], [
+        'race/tour-de-romandie/2018/prologue',
+        'race/tour-de-romandie/2018/stage-1',
+        'race/tour-de-romandie/2018/stage-2',
+        'race/tour-de-romandie/2018/stage-3',
+        'race/tour-de-romandie/2018/stage-4',
+        'race/tour-de-romandie/2018/stage-5'
+    ])
     assert given == expected
 
 

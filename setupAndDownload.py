@@ -24,16 +24,21 @@ def getProfile(URL):
     profileURL = URL + 'gc/stages/winners'
     page = download(profileURL)
     stageProfile = [[] for i in range(6)]
+    stageNames = []
     sections = re.split(r'icon profile p', page)[1:]
     for i in range(len(sections)):
         steepness = int(sections[i][0])
         stageProfile[steepness].append(i)
 
         #test if Timetrial
-        testTT = re.split(r' - ', sections[i])[0]
-        if testTT[-1] == ')':
+        testPart = re.split(r' - ', sections[i])[0]
+        if testPart[-1] == ')':
             stageProfile[0].append(i)
-    return (stageProfile)
+
+        testPart = re.split(r'<a  href="', testPart)[1]
+        stageName = re.split(r'"', testPart)[0]
+        stageNames.append(stageName)
+    return (stageProfile, stageNames)
 
 
 def getStageReadiness(URL):

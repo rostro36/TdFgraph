@@ -1,29 +1,51 @@
 # coding: utf-8
 #libs used
 from textprocess import process
-from data import newstage
+#from data import newstage
 from graph import plot
-from setupAndDownload import getStageReadiness, download, getProfile, getTeamnames, getPedaleurs
-
-import traceback
-import data
+from setupAndDownload import download, getProfile, getTeamnames, getPedaleurs
+import os
+#import traceback
+#import data
 
 #gather the data
-URL = 'https://www.procyclingstats.com/race/vuelta-a-espana/2018/'
-stageProfile = getProfile(URL)
-(readyFlags, numberOfStages) = getStageReadiness(URL)
-teamAbbrevations = getTeamnames(URL)
-pedaleurs = getPedaleurs(URL)
-URL = URL + 'stage-'
-for etape in range(1, numberOfStages):
-    if etape > readyFlags[0]:
-        break
-    print('working on stage:' + str(etape))
-    stageURL = URL + str(etape)
-    page = download(stageURL)
-    #open the file
-    newstage(etape)
-    process(page)
-    print(str(etape) + ' is processed')
+
+raceString = 'race/vuelta-a-espana/2018/'
+URLBase = 'https://www.procyclingstats.com/'
+URL = URLBase + raceString
+folderName = os.path.basename(raceString.replace("/", "@"))
+if not os.path.exists(folderName):
+    os.makedirs(folderName)
+
+(stageProfile, stageNames) = getProfile(URL)
+fileName = os.path.join(folderName, 'stageProfile')
+if not os.path.isfile(fileName):
+    with open(fileName, 'w', encoding='utf-8') as file:
+        file.write(str(stageProfile))
+
+fileName = os.path.join(folderName, 'teamAbbrevations')
+if not os.path.isfile(fileName):
+    teamAbbrevations = getTeamnames(URL)
+    with open(fileName, 'w', encoding='utf-8') as file:
+        file.write(str(teamAbbrevations))
+
+fileName = os.path.join(folderName, 'pedaleurs')
+if not os.path.isfile(fileName):
+    pedaleurs = getPedaleurs(URL)
+    with open(fileName, 'w', encoding='utf-8') as file:
+        file.write(str(pedaleurs))
+
+for stage in stageNames:
+    fileName = os.path.join(folderName, stage.replace("/", "@"))
+    if not os.path.isfile(fileName):
+        print('creating stage:' + str(stage))
+        stageURL = URLBase + str(stage)
+        page = download(stageURL)
+        with open(fileName + 'test', 'w', encoding='utf-8') as file:
+            file.write(page)
+        stageResults = process(page)
+        with open(fileName, 'w', encoding='utf-8') as file:
+            file.write(str(stageResults))
+    print(str(stage) + ' is processed')
 print('processing done')
-plot(etape)  #get the actual site
+#plot(len(stageNames))
