@@ -5,49 +5,65 @@ import sys
 def process(page):
     #split the report of the whole day to the different sections
     resultFlags = checkCategories(page)
-    classements = re.split(r'<tbody>', page)[1:]
-    del classements[1]
+    classements = re.split(r'<tbody><tr data-id="+[0-9]', page)[1:]
     resultObject = dict()
     procFunctions = {
-        "gc": procGC,
-        "points": procPoints,
-        "youth": procYouth,
-        "kom": procKOM,
-        "teams": procGCEquipe
+        "GC": procGC,
+        "Points": procPoints,
+        "Youth": procYouth,
+        "KOM": procKOM,
+        "Teams": procGCEquipe
     }
-    for name in resultFlags.keys():
-        if resultFlags[name]:
+    TTTFlag = re.search(r'\(TTT\) \| Results</title>', page) is None
+    print(TTTFlag)
+    print(resultFlags)
+    for name in resultFlags:
+        if name[:5] == 'Stage':
+            if TTTFlag:
+                classements.pop(0)
+        else:
             resultObject[name] = procFunctions[name](classements.pop(0))
     return resultObject
 
 
 def checkCategories(page):
-    resultFlags = {
-        "gc": False,
-        "points": False,
-        "youth": False,
-        "kom": False,
-        "teams": False
+    possibleFlags = {
+        "GC": '"st4"',
+        "Points": '"st5"',
+        "Youth": '"st6"',
+        "KOM": '"st7"',
+        "Teams": '"st10"',
+        "Stage3": '"st3"',
+        "Stage1": '"st1"'
     }
     if re.search(r'<tbody>', page) is None:
         print('This etape is not ready.')
         quit()
-    for name in resultFlags.keys():
-        if re.search(name + '"><span class=', page) is not None:
-            resultFlags[name] = True
+    resultFlags = []
+    for name in possibleFlags.keys():
+        match = re.search(possibleFlags[name], page)
+        if match is not None:
+            resultFlags.append((match, name))
+    resultFlags.sort(key=lambda obj: obj[0].start())
+    resultFlags = [names for (matches, names) in resultFlags]
     return resultFlags
 
 
 def procGC(gc):
     rankg = 1
     ecarts = dict()
-    gcPedaleurs = re.split(r'<td  class="hide"   data-name="gc"  >\+', gc)[1:]
-    #(ecarts, gcPedaleurs) = setupContainer(gc)
+    gcPedaleurs = re.split(r'<td  class="hide"   data-name="bib"  >', gc)[1:]
     for pedaleur in gcPedaleurs:
-        TIME = getTime(pedaleur)
-        pedaleur = re.split(r'class="hide"   data-name="bib"  >', pedaleur,
-                            1)[1]
         NUMBER = getNumber(pedaleur)
+        if NUMBER is None:
+            continue
+        pedaleur = re.split(r'<span class="timeff">', pedaleur, 1)[1]
+        if rankg == 1:
+            TIME = 0
+        else:
+            TimeNew = getTime(pedaleur)
+            if TimeNew != -1:
+                TIME = TimeNew
         ecarts[NUMBER] = (TIME, rankg)
         rankg += 1
     return ecarts
@@ -58,9 +74,19 @@ def procPoints(points):
     (points, pointsPedaleurs) = setupContainer(points)
     for pedaleur in pointsPedaleurs:
         NUMBER = getNumber(pedaleur)
-        #get to points
-        pedaleur = re.split(r'/a></th><td   >', pedaleur, 1)[1]
-        POINTS = getNumber(pedaleur)
+        if NUMBER is None:
+            continue
+        #check if UCI points are also inside
+        testUCI = len(re.split(r'</th><td   >', pedaleur))
+        #no UCI Points listed
+        if testUCI <= 5:
+            pedaleur = re.split(r'/a></th><td   >', pedaleur, 1)[1]
+            POINTS = getNumber(pedaleur)
+        #UCI Points listed
+        else:
+            pedaleur = re.split(r'/a></th><td   >', pedaleur, 1)[1]
+            pedaleur = re.split(r'</th><td   >', pedaleur, 1)[1]
+            POINTS = getNumber(pedaleur)
         points[NUMBER] = (POINTS, rankp)
         rankp += 1
     return points
@@ -71,6 +97,8 @@ def procKOM(kom):
     (grimpeurs, komPedaleurs) = setupContainer(kom)
     for pedaleur in komPedaleurs:
         NUMBER = getNumber(pedaleur)
+        if NUMBER is None:
+            continue
         #get to KOM points
         pedaleur = re.split(r'</a></th><td   >', pedaleur, 1)[1]
         KOM = getNumber(pedaleur)
@@ -91,7 +119,9 @@ def procGCEquipe(gcequipe):
             TIME = 0
         else:
             equipe = re.split(r'class="timeff">', equipe, 1)[1]
-            TIME = getTime(equipe)
+            TimeNew = getTime(equipe)
+            if TimeNew != -1:
+                TIME = TimeNew
         eq[EQUIPE] = (TIME, ranke)
         ranke += 1
     return eq
@@ -102,6 +132,8 @@ def procYouth(youth):
     (youths, youthEntries) = setupContainer(youth)
     for pedaleur in youthEntries:
         NUMBER = getNumber(pedaleur)
+        if NUMBER is None:
+            continue
         if ranky == 1:
             TIME = 0
         else:
@@ -117,6 +149,8 @@ def getNumber(pedaleur):
     while len(pedaleur) > 0 and pedaleur[0].isdigit():
         nombre += pedaleur[0]
         pedaleur = pedaleur[1:]
+    if nombre == '':
+        return None
     return int(nombre)
 
 
@@ -143,6 +177,8 @@ def getTime(timeString):
             break
         elif c == ' ':
             pass
+        elif c == ',':
+            return -1
         elif c == '-':
             return sys.maxsize
         else:

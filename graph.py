@@ -1,33 +1,51 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-
-#import data
-from data import pedaleurs, ecarts, points, grimpeurs, jeunes, eq, plat, acci, intermediate, montagne, clm, abbrevations
-
-#globals are not needed since we only read them and dont write to them.
+from ast import literal_eval
+from collections import defaultdict
+import os
 
 
-def plot(etape):
-    eq[0] = dict()
+def plot(etape, race, year):
+    raceString = 'race/' + race + '/' + year + '/'
+    folderName = os.path.basename(raceString.replace("/", "@"))
 
-    #make start=0
-    for i in eq[1].keys():
-        eq[0][i] = (0, 0)
-
-    #give font/patch for every type of track
-    pmont = mpatches.Patch(color=(0 / 4, 0 / 4, 1),
+    categories = 5
+    categoryHelper = categories - 1
+    pMFinish = mpatches.Patch(edgecolor=(0, 0, 0),
+                              facecolor=(0 / categoryHelper,
+                                         0 / categoryHelper, 1),
+                              alpha=0.3,
+                              label='mountain finish')
+    pMountain = mpatches.Patch(edgecolor=(0, 0, 0),
+                               facecolor=(1 / categoryHelper,
+                                          1 / categoryHelper, 1),
+                               alpha=0.3,
+                               label='mountain')
+    pHFinish = mpatches.Patch(edgecolor=(0, 0, 0),
+                              facecolor=(2 / categoryHelper,
+                                         2 / categoryHelper, 1),
+                              alpha=0.3,
+                              label='hill finish')
+    pHilly = mpatches.Patch(edgecolor=(0, 0, 0),
+                            facecolor=(3 / categoryHelper, 3 / categoryHelper,
+                                       1),
+                            alpha=0.3,
+                            label='hilly')
+    pFlat = mpatches.Patch(edgecolor=(0, 0, 0),
+                           facecolor=(4 / categoryHelper, 4 / categoryHelper,
+                                      1),
                            alpha=0.3,
-                           label='mountain')
-    pint = mpatches.Patch(color=(1 / 4, 1 / 4, 1),
-                          alpha=0.3,
-                          label='intermediate')
-    pacci = mpatches.Patch(color=(2 / 4, 2 / 4, 1), alpha=0.3, label='hilly')
-    pplat = mpatches.Patch(color=(3 / 4, 3 / 4, 1), alpha=0.3, label='flat')
-    pclm = mpatches.Patch(color=(1, 1, 1), alpha=0.3, label='TT')
-    patches = [pmont, pacci, pplat, pclm]
-    patchnames = ['mountain', 'intermediate', 'hilly', 'flat', 'TT']
+                           label='flat')
+    pTT = mpatches.Patch(edgecolor=(0, 0, 0),
+                         facecolor=(1, 1, 1),
+                         alpha=1,
+                         hatch='///',
+                         label='TT')
+    patches = [pTT, pFlat, pHilly, pHFinish, pMountain, pMFinish]
+    patchnames = [
+        'TT', 'flat', 'hilly', 'hill finish', 'mountain', 'mountain finish'
+    ]
 
-    #usual jaune plot
     plt.rcParams.update({
         'figure.figsize': (25, 50),
         'font.size': 18,
@@ -35,224 +53,89 @@ def plot(etape):
         'legend.fontsize': 15,
         'legend.handlelength': 2
     })
-    #find top 10 in ecarts
-    drivers = [
-        i for i in range(220)
-        if ecarts[etape - 1][i][1] is not None and ecarts[etape -
-                                                          1][i][1] <= 10
+    etapeStringspace = len(str(etape - 1))
+    lastResultName = [
+        x for x in os.listdir(folderName)
+        if x[-(1 + etapeStringspace):] == '%' + str(etape - 1)
     ]
-    #pick subplot
-    plt.subplot(5, 1, 1)
-    plt.xlim(0, etape - 1)
-    plt.xlabel('stage')
-    plt.xticks(range(etape))
-    #color the background acording to track type
-    for i in range(1, etape - 1):
-        if i in plat:
-            plt.axvspan(i - 1, i, facecolor=pplat.get_fc(), alpha=0.3)
-        elif i in montagne:
-            plt.axvspan(i - 1, i, facecolor=pmont.get_fc(), alpha=0.3)
-        elif i in clm:
-            plt.axvspan(i - 1, i, facecolor=pclm.get_fc(), alpha=0.3)
-        elif i in acci:
-            plt.axvspan(i - 1, i, facecolor=pacci.get_fc(), alpha=0.3)
-        elif i in intermediate:
-            plt.axvspan(i - 1, i, facecolor=pint.get_fc(), alpha=0.3)
-    riders = plt.plot(range(etape), [[ecarts[et][dr][0] for dr in drivers]
-                                     for et in range(etape)])
-    plt.ylabel('gap in sec')
-    plt.title('GC 2018')
-    plt.gca().invert_yaxis()
-    #make handles for legend
-    handl = riders + patches
-    #only take certain fields from riders+ tracktype names,
-    labl = [
-        str(peds)[1:-1] for peds in [[
-            pedaleurs[dr][0] + ' ' + pedaleurs[dr][1], pedaleurs[dr]
-            [3].upper(), abbrevations[pedaleurs[dr][4]]
-        ] for dr in drivers]
-    ] + patchnames
-    plt.legend(handles=handl, labels=labl)
+    fileName = lastResultName[0]
+    lastResult = readFile(folderName, fileName)
+    plotAmount = len(lastResult.keys())
+    subplotNumber = 1
+    for category in lastResult.keys():
+        print(category)
+        plt.subplot(plotAmount, 1, subplotNumber)
+        plt.xlim(0, etape - 1)
+        plt.xlabel('stage')
+        plt.xticks(range(etape))
+        drivers = [
+            driver for driver in lastResult[category].keys()
+            if lastResult[category][driver][1] <= 10
+        ]
+        #color the background acording to track type
+        stageProfile = readFile(folderName, 'stageProfile')
+        for etapeIterator in range(etape - 1):
+            for profileType in range(categories + 1):
+                if etapeIterator in stageProfile[profileType]:
+                    plt.axvspan(etapeIterator,
+                                etapeIterator + 1,
+                                facecolor=patches[profileType].get_fc(),
+                                alpha=0.3,
+                                hatch=patches[profileType].get_hatch())
 
-    #respected jaune plot
-    plt.subplot(5, 1, 2)
-    plt.xlim(0, etape - 1)
-    plt.xlabel('stage')
-    plt.xticks(range(etape))
-    for i in range(1, etape):
-        if i in plat:
-            plt.axvspan(i - 1, i, facecolor=pplat.get_fc(), alpha=0.3)
-        elif i in montagne:
-            plt.axvspan(i - 1, i, facecolor=pmont.get_fc(), alpha=0.3)
-        elif i in clm:
-            plt.axvspan(i - 1, i, facecolor=pclm.get_fc(), alpha=0.3)
-        elif i in acci:
-            plt.axvspan(i - 1, i, facecolor=pacci.get_fc(), alpha=0.3)
-        elif i in intermediate:
-            plt.axvspan(i - 1, i, facecolor=pint.get_fc(), alpha=0.3)
-    plt.ylabel('gap in sec')
-    plt.title('GC 2018 best 10 compared')
-    plt.gca().invert_yaxis()
-    riders = plt.plot(range(etape), [[
-        ecarts[et][dr][0] - min([ecarts[et][dri][0] for dri in drivers])
-        for dr in drivers
-    ] for et in range(etape)])
-    handl = riders + patches
-    labl = [
-        str(peds)[1:-1] for peds in [[
-            pedaleurs[dr][0] + ' ' + pedaleurs[dr][1], pedaleurs[dr]
-            [3].upper(), abbrevations[pedaleurs[dr][4]]
-        ] for dr in drivers]
-    ] + patchnames
-    plt.legend(handles=handl, labels=labl)
-
-    #maillot vert
-    drivers = [
-        i for i in range(220)
-        if points[etape - 1][i][1] is not None and points[etape -
-                                                          1][i][1] <= 10
-    ]
-    plt.subplot(5, 1, 3)
-    plt.xlim(0, etape - 1)
-    plt.xlabel('stage')
-    plt.xticks(range(etape))
-    for i in range(1, etape):
-        if i in plat:
-            plt.axvspan(i - 1, i, facecolor=pplat.get_fc(), alpha=0.3)
-        elif i in montagne:
-            plt.axvspan(i - 1, i, facecolor=pmont.get_fc(), alpha=0.3)
-        elif i in clm:
-            plt.axvspan(i - 1, i, facecolor=pclm.get_fc(), alpha=0.3)
-        elif i in acci:
-            plt.axvspan(i - 1, i, facecolor=pacci.get_fc(), alpha=0.3)
-        elif i in intermediate:
-            plt.axvspan(i - 1, i, facecolor=pint.get_fc(), alpha=0.3)
-    plt.ylabel('points')
-    plt.title('point classification 2018')
-    riders = plt.plot(range(etape), [[points[et][dr][0] for dr in drivers]
-                                     for et in range(etape)])
-    handl = riders + patches
-    labl = [
-        str(peds)[1:-1] for peds in [[
-            pedaleurs[dr][0] + ' ' + pedaleurs[dr][1], pedaleurs[dr]
-            [3].upper(), abbrevations[pedaleurs[dr][4]]
-        ] for dr in drivers]
-    ] + patchnames
-    plt.legend(handles=handl, labels=labl)
-
-    #maillot a points
-    drivers = [
-        i for i in range(220)
-        if grimpeurs[etape - 1][i][1] is not None and grimpeurs[etape -
-                                                                1][i][1] <= 10
-    ]
-    plt.subplot(5, 1, 4)
-    plt.xlim(0, etape - 1)
-    plt.xlabel('stage')
-    plt.xticks(range(etape))
-    for i in range(1, etape):
-        if i in plat:
-            plt.axvspan(i - 1, i, facecolor=pplat.get_fc(), alpha=0.3)
-        elif i in montagne:
-            plt.axvspan(i - 1, i, facecolor=pmont.get_fc(), alpha=0.3)
-        elif i in clm:
-            plt.axvspan(i - 1, i, facecolor=pclm.get_fc(), alpha=0.3)
-        elif i in acci:
-            plt.axvspan(i - 1, i, facecolor=pacci.get_fc(), alpha=0.3)
-        elif i in intermediate:
-            plt.axvspan(i - 1, i, facecolor=pint.get_fc(), alpha=0.3)
-    plt.ylabel('points')
-    plt.title('king of the mountain 2018')
-    riders = plt.plot(range(etape), [[grimpeurs[et][dr][0] for dr in drivers]
-                                     for et in range(etape)])
-    handl = riders + patches
-    labl = [
-        str(peds)[1:-1] for peds in [[
-            pedaleurs[dr][0] + ' ' + pedaleurs[dr][1], pedaleurs[dr]
-            [3].upper(), abbrevations[pedaleurs[dr][4]]
-        ] for dr in drivers]
-    ] + patchnames
-    plt.legend(handles=handl, labels=labl)
-
-    # #maillot blanc
-    # drivers = [
-    #     i for i in range(220)
-    #     if jeunes[etape - 1][i] is not None and jeunes[etape - 1][i] <= 10
-    # ]
-    # plt.subplot(6, 1, 5)
-    # plt.xlim(0, etape - 1)
-    # plt.xlabel('stage')
-    # plt.xticks(range(etape))
-    # for i in range(1, etape):
-    #     if i in plat:
-    #         plt.axvspan(i - 1, i, facecolor=pplat.get_fc(), alpha=0.3)
-    #     elif i in montagne:
-    #         plt.axvspan(i - 1, i, facecolor=pmont.get_fc(), alpha=0.3)
-    #     elif i in clm:
-    #         plt.axvspan(i - 1, i, facecolor=pclm.get_fc(), alpha=0.3)
-    #     elif i in acci:
-    #         plt.axvspan(i - 1, i, facecolor=pacci.get_fc(), alpha=0.3)
-    #     elif i in intermediate:
-    #         plt.axvspan(i - 1, i, facecolor=pint.get_fc(), alpha=0.3)
-    # plt.ylabel('gap in sec')
-    # plt.title('maillot blanc 2018')
-    # riders = plt.plot(
-    #     range(etape), [[
-    #         ecarts[et][dr][0] - min([ecarts[et][dri][0]
-    #                                  for dri in drivers])
-    #         for dr in drivers
-    #     ]
-    #                    for et in range(etape)])
-    # plt.gca().invert_yaxis()
-    # handl = riders + patches
-    # labl = [
-    #     str(peds)[1:-1] for peds in
-    #     [[pedaleurs[dr][0] + ' ' + pedaleurs[dr][1], pedaleurs[dr][3:5]]
-    #      for dr in drivers]
-    # ] + patchnames
-    # plt.legend(handles=handl, labels=labl)
-    #team
-    drivers = [i for i in eq[1].keys() if eq[etape - 1][i][0] <= 10]
-    plt.subplot(5, 1, 5)
-    plt.xlim(0, etape - 1)
-    plt.xlabel('stage')
-    plt.xticks(range(etape))
-    for i in range(1, etape):
-        if i in plat:
-            plt.axvspan(i - 1, i, facecolor=pplat.get_fc(), alpha=0.3)
-        elif i in montagne:
-            plt.axvspan(i - 1, i, facecolor=pmont.get_fc(), alpha=0.3)
-        elif i in clm:
-            plt.axvspan(i - 1, i, facecolor=pclm.get_fc(), alpha=0.3)
-        elif i in acci:
-            plt.axvspan(i - 1, i, facecolor=pacci.get_fc(), alpha=0.3)
-        elif i in intermediate:
-            plt.axvspan(i - 1, i, facecolor=pint.get_fc(), alpha=0.3)
-    plt.ylabel('gap in sec')
-    plt.title('team classification 2018')
-    riders = plt.plot(range(etape), [[
-        eq[et][dr][1] - min([eq[et][dri][1] for dri in drivers])
-        for dr in drivers
-    ] for et in range(etape)])
-    plt.gca().invert_yaxis()
-    handl = riders + patches
-    labl = [dr for dr in drivers] + patchnames
-    plt.legend(handles=handl, labels=labl)
+        data = [None] * (etape + 1)
+        data[0] = defaultdict(lambda: (0, 1000))
+        for etapeIterator in range(1, etape):
+            etapeStringspace = len(str(etapeIterator))
+            raceNumber = [
+                x for x in os.listdir(folderName)
+                if x[-(1 + etapeStringspace):] == '%' + str(etapeIterator)
+            ]
+            stageData = readFile(folderName, raceNumber[0])
+            if category in stageData:
+                stageData = stageData[category]
+            else:
+                stageData = dict()
+            stageData = defaultdict(lambda: (0, 1000), stageData)
+            data[etapeIterator] = stageData
+        riders = plt.plot(range(etape), [[data[et][dr][0] for dr in drivers]
+                                         for et in range(etape)])
+        if category == 'Points' or category == 'KOM':
+            plt.ylabel('points')
+        else:
+            plt.ylabel('gap in sec')
+            plt.gca().invert_yaxis()
+        plt.title(category.upper() + ' ' + year)
+        #make handles for legend
+        handl = riders + patches
+        #only take certain fields from riders+ tracktype names,
+        if category == 'Teams':
+            handl = riders + patches
+            labl = [dr for dr in drivers] + patchnames
+        else:
+            pedaleurInfo = readFile(folderName, 'pedaleurs')
+            teamAbbrevations = readFile(folderName, 'teamAbbrevations')
+            labl = [
+                str(peds)[1:-1].replace('\'', '') for peds in [[
+                    pedaleurInfo[dr][0] + ' ' +
+                    pedaleurInfo[dr][1], pedaleurInfo[dr][2].upper(),
+                    teamAbbrevations[pedaleurInfo[dr][3]]
+                ] for dr in drivers]
+            ] + patchnames
+        plt.legend(handles=handl, labels=labl)
+        subplotNumber = subplotNumber + 1
 
     #output
-    plt.savefig('vuelta2018.png', dpi='figure', bbox_inches='tight')
-    plt.show()
+    plt.savefig(race + year + '.png', dpi='figure', bbox_inches='tight')
 
 
-def setBackground(etape):
-    for i in range(1, etape):
-        if i in plat:
-            plt.axvspan(i - 1, i, facecolor=pplat.get_fc(), alpha=0.3)
-        elif i in montagne:
-            plt.axvspan(i - 1, i, facecolor=pmont.get_fc(), alpha=0.3)
-        elif i in clm:
-            plt.axvspan(i - 1, i, facecolor=pclm.get_fc(), alpha=0.3)
-        elif i in acci:
-            plt.axvspan(i - 1, i, facecolor=pacci.get_fc(), alpha=0.3)
-        elif i in intermediate:
-            plt.axvspan(i - 1, i, facecolor=pint.get_fc(), alpha=0.3)
+def readFile(folderName, fileName):
+    fullFileName = os.path.join(folderName, fileName)
+    # special handling code here
+    try:
+        with open(fullFileName, 'r', encoding='utf-8') as file:
+            fileContent = file.read()
+    except IOError:
+        print('Could not find: ' + fullFileName)
+        quit()
+    return literal_eval(fileContent)

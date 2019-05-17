@@ -5,12 +5,12 @@ from textprocess import process
 from graph import plot
 from setupAndDownload import download, getProfile, getTeamnames, getPedaleurs
 import os
-#import traceback
-#import data
+import sys
 
 #gather the data
-
-raceString = 'race/vuelta-a-espana/2018/'
+race = sys.argv[1]
+year = sys.argv[2]
+raceString = 'race/' + race + '/' + year + '/'
 URLBase = 'https://www.procyclingstats.com/'
 URL = URLBase + raceString
 folderName = os.path.basename(raceString.replace("/", "@"))
@@ -34,9 +34,10 @@ if not os.path.isfile(fileName):
     pedaleurs = getPedaleurs(URL)
     with open(fileName, 'w', encoding='utf-8') as file:
         file.write(str(pedaleurs))
-
+stageNumber = 0
 for stage in stageNames:
-    fileName = os.path.join(folderName, stage.replace("/", "@"))
+    fileName = os.path.join(folderName,
+                            stage.replace("/", "@") + '%' + str(stageNumber))
     if not os.path.isfile(fileName):
         print('creating stage:' + str(stage))
         stageURL = URLBase + str(stage)
@@ -46,6 +47,7 @@ for stage in stageNames:
         stageResults = process(page)
         with open(fileName, 'w', encoding='utf-8') as file:
             file.write(str(stageResults))
+    stageNumber = stageNumber + 1
     print(str(stage) + ' is processed')
 print('processing done')
-#plot(len(stageNames))
+plot(stageNumber, race, year)

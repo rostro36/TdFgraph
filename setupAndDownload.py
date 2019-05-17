@@ -23,6 +23,10 @@ def download(URL):
 def getProfile(URL):
     profileURL = URL + 'gc/stages/winners'
     page = download(profileURL)
+    if 'Could not find race' in page:
+        raise Exception(URL +
+                        ' does not exist, please check your input arguments.')
+        quit()
     stageProfile = [[] for i in range(6)]
     stageNames = []
     sections = re.split(r'icon profile p', page)[1:]
