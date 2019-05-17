@@ -63,9 +63,8 @@ def plot(etape, race, year):
     plotAmount = len(lastResult.keys())
     subplotNumber = 1
     for category in lastResult.keys():
-        print(category)
         plt.subplot(plotAmount, 1, subplotNumber)
-        plt.xlim(0, etape - 1)
+        plt.xlim(0, etape)
         plt.xlabel('stage')
         plt.xticks(range(etape))
         drivers = [
@@ -74,7 +73,7 @@ def plot(etape, race, year):
         ]
         #color the background acording to track type
         stageProfile = readFile(folderName, 'stageProfile')
-        for etapeIterator in range(etape - 1):
+        for etapeIterator in range(etape + 1):
             for profileType in range(categories + 1):
                 if etapeIterator in stageProfile[profileType]:
                     plt.axvspan(etapeIterator,
@@ -85,7 +84,7 @@ def plot(etape, race, year):
 
         data = [None] * (etape + 1)
         data[0] = defaultdict(lambda: (0, 1000))
-        for etapeIterator in range(1, etape):
+        for etapeIterator in range(etape):
             etapeStringspace = len(str(etapeIterator))
             raceNumber = [
                 x for x in os.listdir(folderName)
@@ -97,15 +96,16 @@ def plot(etape, race, year):
             else:
                 stageData = dict()
             stageData = defaultdict(lambda: (0, 1000), stageData)
-            data[etapeIterator] = stageData
-        riders = plt.plot(range(etape), [[data[et][dr][0] for dr in drivers]
-                                         for et in range(etape)])
+            data[etapeIterator + 1] = stageData
+        riders = plt.plot(range(etape + 1),
+                          [[data[et][dr][0] for dr in drivers]
+                           for et in range(etape + 1)])
         if category == 'Points' or category == 'KOM':
             plt.ylabel('points')
         else:
             plt.ylabel('gap in sec')
             plt.gca().invert_yaxis()
-        plt.title(category.upper() + ' ' + year)
+        plt.title(category + ' ' + beautify(race) + ' ' + year)
         #make handles for legend
         handl = riders + patches
         #only take certain fields from riders+ tracktype names,
@@ -139,3 +139,30 @@ def readFile(folderName, fileName):
         print('Could not find: ' + fullFileName)
         quit()
     return literal_eval(fileContent)
+
+
+def beautify(race):
+    race = list(race)
+    entryBuffer = list()
+    resultBuffer = list()
+    while len(race) > 0:
+        if race[0] == '-':
+            resultBuffer = addBuffer(resultBuffer, entryBuffer)
+            entryBuffer = list()
+            race.pop(0)
+        else:
+            entryBuffer.extend(race.pop(0))
+    resultBuffer = addBuffer(resultBuffer, entryBuffer)
+    return "".join(resultBuffer)[1:]
+
+
+def addBuffer(resultBuffer, entryBuffer):
+    if len(entryBuffer) > 2:
+        entryBuffer[0] = entryBuffer[0].upper()
+    resultBuffer.extend(' ')
+    resultBuffer.extend(entryBuffer)
+    return resultBuffer
+
+
+if __name__ == '__main__':
+    plot(21, 'tour-de-france', '2018')

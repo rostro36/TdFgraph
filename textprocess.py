@@ -15,8 +15,6 @@ def process(page):
         "Teams": procGCEquipe
     }
     TTTFlag = re.search(r'\(TTT\) \| Results</title>', page) is None
-    print(TTTFlag)
-    print(resultFlags)
     for name in resultFlags:
         if name[:5] == 'Stage':
             if TTTFlag:
@@ -77,16 +75,9 @@ def procPoints(points):
         if NUMBER is None:
             continue
         #check if UCI points are also inside
-        testUCI = len(re.split(r'</th><td   >', pedaleur))
-        #no UCI Points listed
-        if testUCI <= 5:
-            pedaleur = re.split(r'/a></th><td   >', pedaleur, 1)[1]
-            POINTS = getNumber(pedaleur)
-        #UCI Points listed
-        else:
-            pedaleur = re.split(r'/a></th><td   >', pedaleur, 1)[1]
-            pedaleur = re.split(r'</th><td   >', pedaleur, 1)[1]
-            POINTS = getNumber(pedaleur)
+        pedaleur = re.split(r'</th></tr>', pedaleur, 1)[0]
+        pedaleur = re.split(r'>', pedaleur)[-1]
+        POINTS = getNumber(pedaleur)
         points[NUMBER] = (POINTS, rankp)
         rankp += 1
     return points
@@ -100,7 +91,8 @@ def procKOM(kom):
         if NUMBER is None:
             continue
         #get to KOM points
-        pedaleur = re.split(r'</a></th><td   >', pedaleur, 1)[1]
+        pedaleur = re.split(r'</th></tr>', pedaleur, 1)[0]
+        pedaleur = re.split(r'>', pedaleur)[-1]
         KOM = getNumber(pedaleur)
         grimpeurs[NUMBER] = (KOM, rankgr)
         rankgr += 1
