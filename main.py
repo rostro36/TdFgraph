@@ -1,31 +1,54 @@
 # coding: utf-8
 #libs used
-import PyPDF2 as pypdf
-import urllib3
-import io
-from pdfprocess import process
+from textprocess import process
 from graph import plot
-from data import newstage
+from setupAndDownload import download, getProfile, getTeamnames, getPedaleurs
+import os
+import sys
 
-http = urllib3.PoolManager()
 #gather the data
-for etape in range(1, 23):
-    etapestring = (str(hex(etape))[2:]).zfill(2)
-    print('working on stage:' + str(etape))
-    URL = 'http://azure.tissottiming.com/File/00031001070101' + etapestring + 'FFFFFFFFFFFFFF00'
-    #download the data
-    r = http.request('GET', URL)
-    #check if press-release is ready/a PDF
-    if r.info()['Content-type'] != 'application/pdf':
-        print(str(etape) + ' not ready')
-        break
-    #open the file
-    newstage(etape)
-    read_pdf = pypdf.PdfFileReader(io.BytesIO(r.data))
-    #read_pdf=pypdf.PdfFileReader('cat.pdf')
-    #process each page
-    for pagenum in range(read_pdf.getNumPages()):
-        process(read_pdf.getPage(pagenum).extractText())
-    print(str(etape) + ' is processed')
+race = sys.argv[1]
+year = sys.argv[2]
+raceString = 'race/' + race + '/' + year + '/'
+URLBase = 'https://www.procyclingstats.com/'
+URL = URLBase + raceString
+
+folderName = os.path.basename(raceString.replace("/", "@"))
+if not os.path.exists(folderName):
+    os.makedirs(folderName)
+
+(stageProfile, stageNames) = getProfile(URL)
+fileName = os.path.join(folderName, 'stageProfile')
+if not os.path.isfile(fileName):
+    with open(fileName, 'w', encoding='utf-8') as file:
+        file.write(str(stageProfile))
+
+fileName = os.path.join(folderName, 'teamAbbrevations')
+if not os.path.isfile(fileName):
+    teamAbbrevations = getTeamnames(URL)
+    with open(fileName, 'w', encoding='utf-8') as file:
+        file.write(str(teamAbbrevations))
+
+fileName = os.path.join(folderName, 'pedaleurs')
+if not os.path.isfile(fileName):
+    pedaleurs = getPedaleurs(URL)
+    with open(fileName, 'w', encoding='utf-8') as file:
+        file.write(str(pedaleurs))
+
+stageNumber = 0
+for stage in stageNames:
+    fileName = os.path.join(folderName,
+                            stage.replace("/", "@") + '%' + str(stageNumber))
+    if not os.path.isfile(fileName):
+        print('creating stage:' + str(stage))
+        stageURL = URLBase + str(stage)
+        page = download(stageURL)
+        #DEBUG with open(fileName + 'test', 'w', encoding='utf-8') as file:
+        #DEBUG    file.write(page)
+        stageResults = process(page)
+        with open(fileName, 'w', encoding='utf-8') as file:
+            file.write(str(stageResults))
+    stageNumber = stageNumber + 1
+    print(str(stage) + ' is processed')
 print('processing done')
-plot(etape)
+plot(stageNumber, race, year)
