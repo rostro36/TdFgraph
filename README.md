@@ -5,13 +5,13 @@ Like this:<br>
 ![Alt text](/tour-de-france2018.png?raw=true "graph")
 To use:<br>
 ``` 
-\>python main.py <race-name> year
+>python main.py <race-name> year
 ``` 
 e.g.<br>
 ``` 
->\>python main.py tour-de-france 2018
+>python main.py tour-de-france 2018
 ``` 
 ``` 
->\>python main.py giro-d-italia 2017
+>python main.py giro-d-italia 2017
 ``` 
 The program creates subfolders in the directory to store data.<br>
