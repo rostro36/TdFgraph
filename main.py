@@ -1,7 +1,6 @@
 # coding: utf-8
 #libs used
 from textprocess import process
-#from data import newstage
 from graph import plot
 from setupAndDownload import download, getProfile, getTeamnames, getPedaleurs
 import os
@@ -13,6 +12,7 @@ year = sys.argv[2]
 raceString = 'race/' + race + '/' + year + '/'
 URLBase = 'https://www.procyclingstats.com/'
 URL = URLBase + raceString
+
 folderName = os.path.basename(raceString.replace("/", "@"))
 if not os.path.exists(folderName):
     os.makedirs(folderName)
@@ -34,6 +34,7 @@ if not os.path.isfile(fileName):
     pedaleurs = getPedaleurs(URL)
     with open(fileName, 'w', encoding='utf-8') as file:
         file.write(str(pedaleurs))
+
 stageNumber = 0
 for stage in stageNames:
     fileName = os.path.join(folderName,
@@ -42,8 +43,8 @@ for stage in stageNames:
         print('creating stage:' + str(stage))
         stageURL = URLBase + str(stage)
         page = download(stageURL)
-        with open(fileName + 'test', 'w', encoding='utf-8') as file:
-            file.write(page)
+        #DEBUG with open(fileName + 'test', 'w', encoding='utf-8') as file:
+        #DEBUG    file.write(page)
         stageResults = process(page)
         with open(fileName, 'w', encoding='utf-8') as file:
             file.write(str(stageResults))
