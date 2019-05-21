@@ -1,7 +1,9 @@
-from .. import textprocess
 import pytest
+
 from ast import literal_eval
 import os
+
+import TdFgraph.textprocess as textprocess
 
 
 @pytest.mark.lowLevel

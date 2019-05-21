@@ -3,6 +3,7 @@ import matplotlib.patches as mpatches
 from ast import literal_eval
 from collections import defaultdict
 import os
+
 etape = 0
 folderName = ''
 
@@ -86,10 +87,10 @@ def plot(etapeNumber, race, year):
             ] + patchnames
         plt.legend(handles=handl, labels=labl)
         subplotNumber = subplotNumber + 1
-
     #output
-    plt.savefig(race + year + '.png', dpi='figure', bbox_inches='tight')
-    return plt
+    imageName = race + year + '.png'
+    plt.savefig(imageName, dpi='figure', bbox_inches='tight')
+    return imageName
 
 
 def readFile(folderName, fileName):
@@ -188,5 +189,5 @@ def giveLastResult():
     return readFile(folderName, fileName)
 
 
-if __name__ == '__main__':
-    plot(21, 'tour-de-france', '2018')
+# DEBUG: if __name__ == '__main__':
+# DEBUG:     plot(21, 'tour-de-france', '2018')

@@ -1,10 +1,11 @@
 # coding: utf-8
-#libs used
-from textprocess import process
-from graph import plot
-from setupAndDownload import download, getProfile, getTeamnames, getPedaleurs
+
 import os
 import sys
+
+from textprocess import process
+from graph import plot
+from setupAndDownload import download, upload, getProfile, getTeamnames, getPedaleurs
 
 #gather the data
 race = sys.argv[1]
@@ -43,12 +44,14 @@ for stage in stageNames:
         print('creating stage:' + str(stage))
         stageURL = URLBase + str(stage)
         page = download(stageURL)
-        #DEBUG with open(fileName + 'test', 'w', encoding='utf-8') as file:
-        #DEBUG    file.write(page)
+        # DEBUG: with open(fileName + 'test', 'w', encoding='utf-8') as file:
+        # DEBUG:     file.write(page)
         stageResults = process(page)
         with open(fileName, 'w', encoding='utf-8') as file:
             file.write(str(stageResults))
     stageNumber = stageNumber + 1
     print(str(stage) + ' is processed')
 print('processing done')
-plot(stageNumber, race, year)
+
+imageName = plot(stageNumber, race, year)
+print('Your image is uploaded at: ' + str(upload(imageName)))

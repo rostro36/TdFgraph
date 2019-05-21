@@ -1,8 +1,10 @@
 import pytest
+
 import socket
-from .. import setupAndDownload as sAP
 from ast import literal_eval
 import urllib3
+
+import TdFgraph.setupAndDownload as sAP
 
 urllib3.disable_warnings(
     urllib3.exceptions.InsecureRequestWarning
@@ -26,6 +28,33 @@ def test_download_no_net(monkeypatch):
 
             monkeypatch.setattr(socket, 'socket', guard)
             sAP.download('https://httpbin.org/get')
+    assert exit.type == SystemExit
+
+
+@pytest.mark.lowLevel
+def test_upload():
+    given = sAP.upload('tour-de-france2018.png')
+    assert given[:20] == 'https://i.imgur.com/'
+
+
+@pytest.mark.lowLevel
+def test_upload_no_net(monkeypatch):
+    with pytest.raises(SystemExit) as exit:
+        with pytest.raises(Exception) as ex:
+
+            def guard(*args, **kwargs):
+                raise Exception("I told you not to use the Internet!")
+
+            monkeypatch.setattr(socket, 'socket', guard)
+            sAP.upload('tour-de-france2018.png')
+    assert exit.type == SystemExit
+
+
+@pytest.mark.lowLevel
+def test_upload_wrong_file():
+    with pytest.raises(SystemExit) as exit:
+        with pytest.raises(Exception) as ex:
+            sAP.upload('tour-de-france3120.png')
     assert exit.type == SystemExit
 
 
