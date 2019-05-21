@@ -2,7 +2,7 @@
 #libs used
 from textprocess import process
 from graph import plot
-from setupAndDownload import download, getProfile, getTeamnames, getPedaleurs
+from setupAndDownload import download, upload, getProfile, getTeamnames, getPedaleurs
 import os
 import sys
 
@@ -51,4 +51,6 @@ for stage in stageNames:
     stageNumber = stageNumber + 1
     print(str(stage) + ' is processed')
 print('processing done')
-plot(stageNumber, race, year)
+
+imageName = plot(stageNumber, race, year)
+print('Your image is uploaded at: ' + str(upload(imageName)))

@@ -86,10 +86,10 @@ def plot(etapeNumber, race, year):
             ] + patchnames
         plt.legend(handles=handl, labels=labl)
         subplotNumber = subplotNumber + 1
-
     #output
-    plt.savefig(race + year + '.png', dpi='figure', bbox_inches='tight')
-    return plt
+    imageName = race + year + '.png'
+    plt.savefig(imageName, dpi='figure', bbox_inches='tight')
+    return imageName
 
 
 def readFile(folderName, fileName):
