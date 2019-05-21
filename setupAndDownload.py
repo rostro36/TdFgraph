@@ -1,9 +1,9 @@
 import urllib3
-import requests
 import base64
 import json
 import re
-from textprocess import getName, getNumber
+
+from TdFgraph.textprocess import getName, getNumber
 
 urllib3.disable_warnings(
     urllib3.exceptions.InsecureRequestWarning
@@ -24,7 +24,6 @@ def upload(imageName):
     b64_image = base64.standard_b64encode(image_data)
     url = 'https://api.imgur.com/3/image'
     payload = {'image': b64_image}
-    #payload = json.dumps(payload).encode('utf-8')
     headers = {'Authorization': 'Client-ID bb79416fdaad09a'}
     try:
         response = http.request('POST',

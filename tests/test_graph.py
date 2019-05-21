@@ -1,8 +1,10 @@
 import pytest
-from .. import graph
+
 from ast import literal_eval
 from matplotlib.testing.decorators import image_comparison
 import matplotlib.pyplot as plt
+
+import TdFgraph.graph as graph
 
 
 @pytest.mark.lowLevel
