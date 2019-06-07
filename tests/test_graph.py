@@ -30,4 +30,6 @@ def test_readFile():
 })
 def test_plot():
     os.chdir(os.curdir + '/tests')
-    return graph.plot(21, 'tour-de-france', '2018')
+    result = graph.plot(21, 'tour-de-france', '2018')
+    os.chdir('..')
+    return result
