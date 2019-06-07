@@ -57,7 +57,7 @@ def test_number():
 
 @pytest.mark.midLevel
 def test_gc():
-    with open('gc_testpage', 'r', encoding='utf-8') as file:
+    with open('tests/gc_testpage', 'r', encoding='utf-8') as file:
         testpage = file.read()
     print('ayoo')
     print(testpage)
@@ -70,7 +70,7 @@ def test_gc():
 
 @pytest.mark.midLevel
 def test_points():
-    with open('points_testpage', 'r', encoding='utf-8') as file:
+    with open('tests/points_testpage', 'r', encoding='utf-8') as file:
         testpage = file.read()
     given = textprocess.procPoints(testpage)
     expected = literal_eval(
@@ -81,7 +81,7 @@ def test_points():
 
 @pytest.mark.midLevel
 def test_kom():
-    with open('kom_testpage', 'r', encoding='utf-8') as file:
+    with open('tests/kom_testpage', 'r', encoding='utf-8') as file:
         testpage = file.read()
     given = textprocess.procKOM(testpage)
     expected = literal_eval(
@@ -92,7 +92,7 @@ def test_kom():
 
 @pytest.mark.midLevel
 def test_youth():
-    with open('youth_testpage', 'r', encoding='utf-8') as file:
+    with open('tests/youth_testpage', 'r', encoding='utf-8') as file:
         testpage = file.read()
     given = textprocess.procYouth(testpage)
     expected = literal_eval(
@@ -103,7 +103,7 @@ def test_youth():
 
 @pytest.mark.midLevel
 def test_team():
-    with open('teams_testpage', 'r', encoding='utf-8') as file:
+    with open('tests/teams_testpage', 'r', encoding='utf-8') as file:
         testpage = file.read()
     given = textprocess.procGCEquipe(testpage)
     expected = literal_eval(
@@ -114,7 +114,7 @@ def test_team():
 
 @pytest.mark.midLevel
 def test_categories():
-    testpath = 'race@tour-de-france@2018@/race@tour-de-france@2018@stage-1%0test'
+    testpath = 'tests/race@tour-de-france@2018@/race@tour-de-france@2018@stage-1%0test'
     with open(testpath, 'r', encoding='utf-8') as file:
         testpage = file.read()
     expected = textprocess.checkCategories(testpage)
@@ -124,10 +124,10 @@ def test_categories():
 
 @pytest.mark.HighLevel
 def test_process():
-    testfiles = os.listdir('race@tour-de-france@2018@')
+    testfiles = os.listdir('tests/race@tour-de-france@2018@')
     testfiles = [file for file in testfiles if file[-4:] == 'test']
     for testfile in testfiles:
-        testfile = os.path.join('race@tour-de-france@2018@', testfile)
+        testfile = os.path.join('tests/race@tour-de-france@2018@', testfile)
         with open(testfile, 'r', encoding='utf-8') as file:
             testpage = file.read()
         expected = textprocess.process(testpage)

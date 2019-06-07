@@ -95,6 +95,6 @@ def test_Profile():
 def test_Pedaleurs():
     given = sAP.getPedaleurs(
         'https://www.procyclingstats.com/race/vuelta-a-espana/2018/')
-    with open('pedaleurs_testresult', 'r', encoding='utf-8') as file:
+    with open('tests/pedaleurs_testresult', 'r', encoding='utf-8') as file:
         expected = literal_eval(file.read())
     assert given == expected

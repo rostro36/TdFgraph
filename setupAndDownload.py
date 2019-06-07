@@ -3,7 +3,7 @@ import base64
 import json
 import re
 
-from TdFgraph.textprocess import getName, getNumber
+from textprocess import getName, getNumber
 
 urllib3.disable_warnings(
     urllib3.exceptions.InsecureRequestWarning
@@ -81,11 +81,10 @@ def getStageReadiness(URL):
     stagesURL = URL + 'gc/stages/leaders-overview'
     page = download(stagesURL)
 
-    stages = re.split(r'<tr class=""><td class=" " >', page)[1:]
+    stages = re.split(r'<tr class=" "><td class=" " >', page)[1:]
     numberOfStages = len(stages)
     # GC Points KOM Youth Teams
     FLAGS = [0, 0, 0, 0, 0]
-
     for stageNumber in range(len(stages)):
         testStage = stages[stageNumber]
 
@@ -122,6 +121,8 @@ def getTeamnames(URL):
 
         namePart = re.split(r'></span><h1>', namePart, 1)[1]
         teamName = re.split(r'  ', namePart, 1)[0]
+        if '<' in teamName:
+            teamName = re.split(r' <', teamName, 1)[0]
         teamDict[teamName] = teamAbbrevation
     return teamDict
 

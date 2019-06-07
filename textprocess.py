@@ -32,7 +32,8 @@ def checkCategories(page):
         "KOM": '"st7"',
         "Teams": '"st10"',
         "Stage3": '"st3"',
-        "Stage1": '"st1"'
+        "Stage1": '"st1"',
+        "Stage2": '"st2"'
     }
     if re.search(r'<tbody>', page) is None:
         print('This etape is not ready.')
