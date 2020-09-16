@@ -69,6 +69,8 @@ def procGC(gc):
 
 
 def procPoints(points):
+    #with open('points_testpage', 'w', encoding='utf-8') as file:
+        #    file.write(points)    
     rankp = 1
     (points, pointsPedaleurs) = setupContainer(points)
     for pedaleur in pointsPedaleurs:
@@ -77,14 +79,21 @@ def procPoints(points):
             continue
         #check if UCI points are also inside
         pedaleur = re.split(r'</th></tr>', pedaleur, 1)[0]
-        pedaleur = re.split(r'>', pedaleur)[-1]
-        POINTS = getNumber(pedaleur)
+        pedaleur = re.split(r'</a></th><td   >', pedaleur,1)[-1]
+        POINTSlist=[]
+        POINTSlist.append(getNumber(pedaleur))
+        while '</th><td   >' in pedaleur:
+            pedaleur = re.split(r'</th><td   >', pedaleur,1)[-1]
+            POINTSlist.append(getNumber(pedaleur))
+        POINTS= POINTSlist[int(len(POINTSlist)/2)]
         points[NUMBER] = (POINTS, rankp)
         rankp += 1
     return points
 
 
 def procKOM(kom):
+    #with open('kom_testpage', 'w', encoding='utf-8') as file:
+    #    file.write(kom)    
     rankgr = 1
     (grimpeurs, komPedaleurs) = setupContainer(kom)
     for pedaleur in komPedaleurs:
@@ -93,8 +102,13 @@ def procKOM(kom):
             continue
         #get to KOM points
         pedaleur = re.split(r'</th></tr>', pedaleur, 1)[0]
-        pedaleur = re.split(r'>', pedaleur)[-1]
-        KOM = getNumber(pedaleur)
+        pedaleur = re.split(r'</a></th><td   >', pedaleur,1)[-1]
+        KOMlist=[]
+        KOMlist.append(getNumber(pedaleur))
+        while '</th><td   >' in pedaleur:
+            pedaleur = re.split(r'</th><td   >', pedaleur,1)[-1]
+            KOMlist.append(getNumber(pedaleur))
+        KOM=KOMlist[int(len(KOMlist)/2)]
         grimpeurs[NUMBER] = (KOM, rankgr)
         rankgr += 1
     return grimpeurs
@@ -184,3 +198,4 @@ def setupContainer(allPedaleurs):
                                   allPedaleurs)[1:]
     container = dict()
     return (container, separatedPedaleurs)
+    

@@ -44,8 +44,8 @@ for stage in stageNames:
         print('creating stage:' + str(stage))
         stageURL = URLBase + str(stage)
         page = download(stageURL)
-        # DEBUG: with open(fileName + 'test', 'w', encoding='utf-8') as file:
-        # DEBUG:     file.write(page)
+        #with open(fileName + 'test', 'w', encoding='utf-8') as file:
+        #    file.write(page)
         stageResults = process(page)
         with open(fileName, 'w', encoding='utf-8') as file:
             file.write(str(stageResults))
