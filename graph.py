@@ -51,6 +51,8 @@ def plot(etapeNumber, race, year):
             stageData = readFile(folderName, raceName[0])
             if category in stageData:
                 stageData = stageData[category]
+                if list(stageData.values())[0][0] is None and etapeIterator>0:
+                    stageData=data[etapeIterator]
             else:
                 stageData = dict()
             stageData = defaultdict(lambda: (0, 1000), stageData)
@@ -190,4 +192,4 @@ def giveLastResult():
 
 
 # DEBUG: if __name__ == '__main__':
-# DEBUG:     plot(21, 'tour-de-france', '2018')
+# DEBUG:    plot(9, 'tour-de-suisse', '2018')
